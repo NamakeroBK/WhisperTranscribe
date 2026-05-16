@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Whisper.net;
+using Whisper.net.LibraryLoader;
 using Whisper.net.SamplingStrategy;
 
 namespace WhisperTranscribe.Services;
@@ -22,11 +23,35 @@ public class Transcriber
     public event Action<string>? Log;
     public event Action<int>? Progress;
 
+    /// <summary>
+    /// 既定では Cuda → Vulkan → ... の順で試みるが、AMD GPU の Vulkan ランタイムで
+    /// クラッシュするケースがあるため、CPU を最優先に固定する。
+    /// 環境変数 WHISPER_RUNTIME で上書き可 (例: "Vulkan,Cpu" / "Cuda,Cpu" / "Cpu" / "CpuNoAvx").
+    /// </summary>
+    public static void ConfigureRuntime()
+    {
+        var env = Environment.GetEnvironmentVariable("WHISPER_RUNTIME");
+        List<RuntimeLibrary> order;
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            order = env.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(s => Enum.TryParse<RuntimeLibrary>(s, true, out var v) ? v : (RuntimeLibrary?)null)
+                .Where(v => v.HasValue).Select(v => v!.Value).ToList();
+        }
+        else
+        {
+            order = new List<RuntimeLibrary> { RuntimeLibrary.Cpu, RuntimeLibrary.CpuNoAvx };
+        }
+        if (order.Count == 0) order = new List<RuntimeLibrary> { RuntimeLibrary.Cpu, RuntimeLibrary.CpuNoAvx };
+        RuntimeOptions.RuntimeLibraryOrder = order;
+    }
+
     public class Options
     {
         public string Language { get; init; } = "auto";
         public bool HighQuality { get; init; } = false;
         public int Threads { get; init; } = 0; // 0 = 自動
+        public List<RuntimeLibrary>? RuntimeOrder { get; init; } = null;
 
         /// <summary>
         /// Whisper の initial_prompt。指示文ではなく「模範的な書き起こし例」として書く。
@@ -52,7 +77,8 @@ public class Transcriber
         if (!File.Exists(modelPath))
             throw new FileNotFoundException("モデルファイルが見つかりません。", modelPath);
 
-        Log?.Invoke($"モデル読み込み: {Path.GetFileName(modelPath)}");
+        ConfigureRuntime();
+        Log?.Invoke($"モデル読み込み: {Path.GetFileName(modelPath)} (runtime order: {string.Join(",", RuntimeOptions.RuntimeLibraryOrder)})");
         using var factory = WhisperFactory.FromPath(modelPath);
 
         var beamSize = options.HighQuality ? 10 : 5;
