@@ -25,3 +25,10 @@ desktop.ini
 ## App-generated
 *.log
 temp/
+
+## Test artifacts (生成物)
+test_data/*.m4a
+test_data/*.wav
+test_data/*.mp3
+test_data/*_whisper.*
+test_data/run.log
