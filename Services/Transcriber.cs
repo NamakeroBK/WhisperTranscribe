@@ -27,6 +27,13 @@ public class Transcriber
         public string Language { get; init; } = "auto";
         public bool HighQuality { get; init; } = false;
         public int Threads { get; init; } = 0; // 0 = 自動
+
+        /// <summary>
+        /// Whisper の initial_prompt。指示文ではなく「模範的な書き起こし例」として書く。
+        /// 上限 224 トークン (日本語で約 150〜180 文字)。
+        /// 句読点付きの完成文 2〜3 文 + 固有名詞 10〜15 語が目安。
+        /// </summary>
+        public string? InitialPrompt { get; init; }
     }
 
     public class Segment
@@ -59,6 +66,12 @@ public class Transcriber
             .WithEntropyThreshold(2.4f)
             .WithLogProbThreshold(-1.0f)
             .WithProgressHandler(p => Progress?.Invoke(p));
+
+        if (!string.IsNullOrWhiteSpace(options.InitialPrompt))
+        {
+            builder = builder.WithPrompt(options.InitialPrompt);
+            Log?.Invoke($"initial_prompt 設定 ({options.InitialPrompt.Length} 文字)");
+        }
 
         var beam = (BeamSearchSamplingStrategyBuilder)builder.WithBeamSearchSamplingStrategy();
         beam.WithBeamSize(beamSize).WithPatience(1.0f);

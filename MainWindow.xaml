@@ -69,6 +69,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,4">モデル:</TextBlock>
@@ -93,6 +94,15 @@
                     <CheckBox x:Name="OutVtt" Content=".vtt"/>
                 </StackPanel>
                 <TextBox Grid.Row="1" Grid.Column="5" x:Name="OutNameBox" Margin="0,4,0,0" ToolTip="出力ファイル名 (拡張子なし)"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Margin="0,8,8,0">
+                    <Run Text="初期プロンプト:"/><LineBreak/>
+                    <Run FontSize="10" Foreground="Gray" Text="(任意・上限約180字)"/>
+                </TextBlock>
+                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="5" x:Name="InitialPromptBox"
+                         Margin="0,8,0,0" Height="60"
+                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                         ToolTip="「指示」ではなく「模範的な書き起こし例」を書きます。句読点付きの完成文を 2〜3 文 + 固有名詞 10〜15 語が目安。例: 本日の会議では、新製品の発売スケジュールについて議論しました。担当者は田中課長、佐藤主任です。"/>
             </Grid>
         </GroupBox>
 

@@ -292,10 +292,12 @@ public partial class MainWindow : Window
             var wav = await audio.ProcessAsync(_files.Select(f => f.FullPath).ToList(), normalize, _cts.Token);
 
             // 2. 文字起こし
+            var promptText = InitialPromptBox.Text?.Trim();
             var opts = new Transcriber.Options
             {
                 Language = lang,
                 HighQuality = HighQualityCheck.IsChecked == true,
+                InitialPrompt = string.IsNullOrWhiteSpace(promptText) ? null : promptText,
             };
             var segs = await transcriber.TranscribeAsync(wav, model.FilePath, opts, _cts.Token);
 
