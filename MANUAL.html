@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>WhisperTranscribe ユーザーマニュアル</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --bg: #fbfbfd;
+  --fg: #1d1d1f;
+  --muted: #6e6e73;
+  --accent: #0066cc;
+  --accent-light: #e6f0fb;
+  --border: #d2d2d7;
+  --code-bg: #f5f5f7;
+  --warn: #ff9500;
+  --warn-bg: #fff4e0;
+  --ok: #34c759;
+  --ok-bg: #e6f8ec;
+  --bad: #ff3b30;
+  --bad-bg: #ffe6e3;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+  line-height: 1.7; font-size: 15px; }
+.wrap { display: grid; grid-template-columns: 260px 1fr; max-width: 1280px; margin: 0 auto; min-height: 100vh; }
+nav.toc {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  padding: 24px 16px; border-right: 1px solid var(--border); background: #fff;
+}
+nav.toc h2 { font-size: 13px; color: var(--muted); margin: 16px 0 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+nav.toc a { display: block; padding: 6px 8px; color: var(--fg); text-decoration: none; border-radius: 6px; font-size: 13px; }
+nav.toc a:hover { background: var(--accent-light); color: var(--accent); }
+nav.toc .title { font-weight: 700; font-size: 16px; color: var(--fg); margin-bottom: 8px; }
+nav.toc .subtitle { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+
+main { padding: 40px 56px 80px; max-width: 920px; }
+h1 { font-size: 32px; margin: 0 0 8px; letter-spacing: -0.02em; }
+h2 { font-size: 24px; margin: 56px 0 16px; padding-top: 16px; border-top: 1px solid var(--border); letter-spacing: -0.01em; }
+h2:first-of-type { border-top: none; padding-top: 0; }
+h3 { font-size: 18px; margin: 32px 0 8px; }
+h4 { font-size: 15px; margin: 24px 0 8px; color: var(--muted); }
+p { margin: 12px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; font-family: "SF Mono", "Cascadia Code", Consolas, Monaco, monospace; font-size: 13px; }
+pre { background: var(--code-bg); padding: 16px 20px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.55; }
+pre code { background: none; padding: 0; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 14px; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--code-bg); font-weight: 600; }
+td.center, th.center { text-align: center; }
+
+.hero {
+  background: linear-gradient(135deg, #0066cc 0%, #3da5f5 100%); color: white;
+  padding: 40px 56px; border-radius: 16px; margin-bottom: 40px;
+}
+.hero h1 { color: white; margin-bottom: 8px; font-size: 36px; }
+.hero p { margin: 4px 0; color: rgba(255,255,255,0.9); font-size: 16px; }
+.hero .repo a { color: white; opacity: 0.8; font-size: 13px; text-decoration: underline; }
+
+.callout { border-left: 4px solid; padding: 12px 16px; margin: 16px 0; border-radius: 4px; }
+.callout.tip { border-color: var(--accent); background: var(--accent-light); }
+.callout.warn { border-color: var(--warn); background: var(--warn-bg); }
+.callout.ok { border-color: var(--ok); background: var(--ok-bg); }
+.callout.bad { border-color: var(--bad); background: var(--bad-bg); }
+.callout strong { display: block; margin-bottom: 4px; }
+
+.diagram { margin: 24px 0; text-align: center; }
+.diagram svg { max-width: 100%; height: auto; }
+.diagram .caption { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+.do-dont .col { padding: 16px; border-radius: 8px; }
+.do-dont .col h4 { margin-top: 0; }
+.do-dont .good { background: var(--ok-bg); border: 1px solid var(--ok); }
+.do-dont .good h4 { color: #248a3d; }
+.do-dont .bad { background: var(--bad-bg); border: 1px solid var(--bad); }
+.do-dont .bad h4 { color: #c81106; }
+.do-dont ul { margin: 4px 0 4px 20px; padding: 0; }
+
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: 13px; }
+.kv dt { color: var(--muted); }
+
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 24px; }
+.tag { background: var(--accent-light); color: var(--accent); padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+
+@media (max-width: 900px) {
+  .wrap { grid-template-columns: 1fr; }
+  nav.toc { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+  main { padding: 24px; }
+  .hero { padding: 32px 24px; border-radius: 0; margin: -24px -24px 24px; }
+  .do-dont { grid-template-columns: 1fr; }
+}
+
+@media print {
+  nav.toc { display: none; }
+  .wrap { grid-template-columns: 1fr; }
+  main { padding: 20px; max-width: none; }
+  .hero { background: white; color: black; padding: 0; }
+  .hero h1, .hero p, .hero .repo a { color: black; }
+  h2 { break-before: page; }
+  pre, .diagram svg { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="toc">
+  <div class="title">WhisperTranscribe</div>
+  <div class="subtitle">v1.0 ユーザーマニュアル</div>
+  <h2>目次</h2>
+  <a href="#overview">1. このアプリでできること</a>
+  <a href="#env">2. 動作環境</a>
+  <a href="#install">3. インストール</a>
+  <a href="#setup">4. 初回セットアップ</a>
+  <a href="#gui">5. GUI版の使い方</a>
+  <a href="#cli">6. CLI版（wtcli）</a>
+  <a href="#models">7. モデルの選び方</a>
+  <a href="#prompt">8. 初期プロンプト</a>
+  <a href="#inputs">9. 入力フォーマット</a>
+  <a href="#outputs">10. 出力フォーマット</a>
+  <a href="#paths">11. ファイル保管場所</a>
+  <a href="#troubleshoot">12. トラブルシューティング</a>
+  <a href="#colab">13. Colab 半手動連携</a>
+  <h2>外部</h2>
+  <a href="https://github.com/NamakeroBK/WhisperTranscribe" target="_blank">GitHub リポジトリ</a>
+  <a href="https://colab.research.google.com/github/NamakeroBK/WhisperTranscribe/blob/main/colab/whisper_transcribe.ipynb" target="_blank">Colab を開く</a>
+</nav>
+
+<main>
+
+<div class="hero">
+  <h1>WhisperTranscribe</h1>
+  <p>ローカル PC 上で動作する音声・動画ファイル文字起こしツール</p>
+  <p>録音機が分割した複数ファイルをひとまとめにし、Whisper による文字起こしまでを1アプリで完結</p>
+  <div class="repo"><a href="https://github.com/NamakeroBK/WhisperTranscribe">https://github.com/NamakeroBK/WhisperTranscribe</a></div>
+</div>
+
+<div class="tags">
+  <span class="tag">Windows 10/11</span>
+  <span class="tag">.NET 8 WPF</span>
+  <span class="tag">Whisper.net 1.9</span>
+  <span class="tag">ffmpeg</span>
+  <span class="tag">CPU / CUDA / Vulkan</span>
+  <span class="tag">無料 Colab GPU</span>
+</div>
+
+<h2 id="overview">1. このアプリでできること</h2>
+
+<div class="diagram">
+<svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .box { fill: #ffffff; stroke: #0066cc; stroke-width: 1.5; rx: 6; }
+    .box-input { fill: #e6f0fb; }
+    .box-process { fill: #fff4e0; stroke: #ff9500; }
+    .box-output { fill: #e6f8ec; stroke: #34c759; }
+    .label { font: 13px -apple-system, sans-serif; fill: #1d1d1f; }
+    .label-sub { font: 11px -apple-system, sans-serif; fill: #6e6e73; }
+    .arrow { fill: none; stroke: #6e6e73; stroke-width: 1.5; marker-end: url(#arr); }
+  </style>
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#6e6e73"/>
+    </marker>
+  </defs>
+
+  <!-- inputs -->
+  <rect class="box box-input" x="20" y="20" width="160" height="60" rx="6"/>
+  <text class="label" x="100" y="42" text-anchor="middle">複数の音声/動画</text>
+  <text class="label-sub" x="100" y="60" text-anchor="middle">WAV/MP3/M4A/MP4/MOV...</text>
+  <text class="label-sub" x="100" y="75" text-anchor="middle">32bit float WAV も可</text>
+
+  <!-- preprocess -->
+  <rect class="box box-process" x="240" y="20" width="200" height="60"/>
+  <text class="label" x="340" y="40" text-anchor="middle">ffmpeg で前処理</text>
+  <text class="label-sub" x="340" y="56" text-anchor="middle">連結 → ラウドネス正規化</text>
+  <text class="label-sub" x="340" y="71" text-anchor="middle">→ 16kHz mono 16bit WAV</text>
+
+  <!-- whisper -->
+  <rect class="box box-process" x="500" y="20" width="200" height="60"/>
+  <text class="label" x="600" y="40" text-anchor="middle">Whisper 推論</text>
+  <text class="label-sub" x="600" y="56" text-anchor="middle">model: tiny〜large-v3-turbo</text>
+  <text class="label-sub" x="600" y="71" text-anchor="middle">日本語/英語/auto...</text>
+
+  <!-- outputs -->
+  <rect class="box box-output" x="240" y="160" width="120" height="40"/>
+  <text class="label" x="300" y="184" text-anchor="middle">.txt</text>
+  <rect class="box box-output" x="380" y="160" width="120" height="40"/>
+  <text class="label" x="440" y="184" text-anchor="middle">.srt</text>
+  <rect class="box box-output" x="520" y="160" width="120" height="40"/>
+  <text class="label" x="580" y="184" text-anchor="middle">.vtt</text>
+
+  <!-- options -->
+  <rect class="box" x="240" y="220" width="400" height="40" fill="#f5f5f7" stroke="#d2d2d7"/>
+  <text class="label-sub" x="440" y="245" text-anchor="middle">初期プロンプト・高品質モード・モデル切替・正規化ON/OFF</text>
+
+  <!-- arrows -->
+  <path class="arrow" d="M 180 50 L 235 50"/>
+  <path class="arrow" d="M 440 50 L 495 50"/>
+  <path class="arrow" d="M 600 80 L 600 100 L 440 100 L 440 155"/>
+</svg>
+<div class="caption">▲ 処理パイプライン全体図</div>
+</div>
+
+<ul>
+  <li>音声ファイル（WAV/MP3/M4A/FLAC/OGG等）・動画ファイル（MP4/MOV/MKV/AVI等）の<strong>文字起こし</strong></li>
+  <li>録音機が30分単位などで分割した<strong>複数ファイルを順序通りに連結</strong></li>
+  <li>録音レベルのばらつきを<strong>ラウドネス正規化</strong>で均す</li>
+  <li><strong>32bit float WAV</strong> など Whisper が直接読めない形式を自動変換</li>
+  <li>モデル（精度と速度のトレードオフ）を GUI から<strong>ダウンロード・切り替え</strong></li>
+  <li>出力は <code>.txt</code> / <code>.srt</code> / <code>.vtt</code> 形式</li>
+  <li>インターネット不要で動作（初回のみ ffmpeg とモデルの取得のため接続が必要）</li>
+  <li><strong>無料 Colab GPU</strong> で高速処理する半手動連携機能あり（<a href="#colab">§13</a>）</li>
+</ul>
+
+<h2 id="env">2. 動作環境</h2>
+<table>
+  <tr><th>項目</th><th>要件</th></tr>
+  <tr><td>OS</td><td>Windows 10/11 x64</td></tr>
+  <tr><td>.NET</td><td>.NET 8 Desktop Runtime</td></tr>
+  <tr><td>CPU</td><td>x86/x64（AVX 非対応 CPU は自動で <code>CpuNoAvx</code> ランタイムが選ばれます）</td></tr>
+  <tr><td>RAM</td><td>4 GB 以上（large 系モデルは 6 GB 以上推奨）</td></tr>
+  <tr><td>ディスク</td><td>100 MB（アプリ本体）＋ モデル分（最小 77 MB 〜 最大 約3 GB）</td></tr>
+  <tr><td>通信</td><td>初回 ffmpeg・モデル DL のみ</td></tr>
+</table>
+
+<h2 id="install">3. インストール</h2>
+
+<h3>バイナリ利用の場合</h3>
+<p>GitHub Releases からビルド済み ZIP をダウンロードし、任意のフォルダに展開。</p>
+
+<h3>ソースからビルド</h3>
+<pre><code>git clone https://github.com/NamakeroBK/WhisperTranscribe.git
+cd WhisperTranscribe
+dotnet build -c Release</code></pre>
+
+<p>生成物:</p>
+<ul>
+  <li>GUI: <code>bin\Release\net8.0-windows\WhisperTranscribe.exe</code></li>
+  <li>CLI: <code>TestRunner\bin\Release\net8.0\wtcli.exe</code></li>
+</ul>
+
+<h2 id="setup">4. 初回セットアップ</h2>
+
+<p>アプリは次の2つを必要としますが、<strong>初回起動時に自動でダウンロード</strong>されます。</p>
+
+<div class="diagram">
+<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .b { fill: #ffffff; stroke: #d2d2d7; stroke-width: 1.5; rx: 6; }
+    .b-app { fill: #e6f0fb; stroke: #0066cc; }
+    .b-net { fill: #fff4e0; stroke: #ff9500; }
+    .lab { font: 13px sans-serif; fill: #1d1d1f; }
+    .lab-s { font: 11px sans-serif; fill: #6e6e73; }
+    .a { fill: none; stroke: #6e6e73; stroke-width: 1.5; marker-end: url(#a2); }
+  </style>
+  <defs><marker id="a2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#6e6e73"/></marker></defs>
+
+  <rect class="b b-app" x="20" y="70" width="160" height="60"/>
+  <text class="lab" x="100" y="95" text-anchor="middle">WhisperTranscribe</text>
+  <text class="lab-s" x="100" y="115" text-anchor="middle">起動直後</text>
+
+  <rect class="b b-net" x="280" y="20" width="200" height="60"/>
+  <text class="lab" x="380" y="40" text-anchor="middle">gyan.dev</text>
+  <text class="lab-s" x="380" y="58" text-anchor="middle">ffmpeg release essentials</text>
+  <text class="lab-s" x="380" y="72" text-anchor="middle">約 100 MB</text>
+
+  <rect class="b b-net" x="280" y="120" width="200" height="60"/>
+  <text class="lab" x="380" y="140" text-anchor="middle">HuggingFace</text>
+  <text class="lab-s" x="380" y="158" text-anchor="middle">ggml-*.bin (モデル)</text>
+  <text class="lab-s" x="380" y="172" text-anchor="middle">77 MB 〜 3 GB</text>
+
+  <rect class="b" x="540" y="70" width="160" height="60" fill="#e6f8ec" stroke="#34c759"/>
+  <text class="lab" x="620" y="95" text-anchor="middle">%LOCALAPPDATA%</text>
+  <text class="lab-s" x="620" y="115" text-anchor="middle">WhisperTranscribe\</text>
+
+  <path class="a" d="M 180 95 L 275 50"/>
+  <path class="a" d="M 180 105 L 275 150"/>
+  <path class="a" d="M 485 50 L 540 90"/>
+  <path class="a" d="M 485 150 L 540 110"/>
+</svg>
+<div class="caption">▲ 初回起動時のダウンロードフロー</div>
+</div>
+
+<table>
+  <tr><th>項目</th><th>サイズ</th><th>保存先</th><th>用途</th></tr>
+  <tr><td>ffmpeg / ffprobe</td><td>約 100 MB</td><td><code>%LOCALAPPDATA%\WhisperTranscribe\ffmpeg\</code></td><td>音声/動画のデコード・連結・正規化・リサンプリング</td></tr>
+  <tr><td>Whisper モデル</td><td>77 MB 〜 3 GB</td><td><code>%LOCALAPPDATA%\WhisperTranscribe\models\</code></td><td>文字起こしエンジン</td></tr>
+</table>
+
+<div class="callout tip"><strong>📌 一度ダウンロードすれば再取得は不要</strong>同じ PC で複数回起動しても、既存のファイルが使われます。</div>
+
+<h2 id="gui">5. GUI版の使い方</h2>
+
+<h3>5-1. UI レイアウト</h3>
+
+<div class="diagram">
+<svg viewBox="0 0 760 460" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .win { fill: #f5f5f7; stroke: #d2d2d7; stroke-width: 1.5; rx: 8; }
+    .panel { fill: #ffffff; stroke: #d2d2d7; rx: 6; }
+    .btn { fill: #0066cc; rx: 4; }
+    .btn-ghost { fill: #ffffff; stroke: #0066cc; stroke-width: 1; rx: 4; }
+    .head { font: bold 12px sans-serif; fill: #1d1d1f; }
+    .l { font: 11px sans-serif; fill: #1d1d1f; }
+    .l-w { font: 11px sans-serif; fill: white; }
+    .l-c { font: 11px sans-serif; fill: #0066cc; }
+    .l-m { font: 10px sans-serif; fill: #6e6e73; }
+    .row { fill: #fafafa; stroke: #e5e5e7; }
+  </style>
+
+  <!-- window -->
+  <rect class="win" x="10" y="10" width="740" height="440"/>
+  <text class="head" x="30" y="36">WhisperTranscribe</text>
+  <rect class="btn-ghost" x="450" y="22" width="80" height="22"/>
+  <text class="l-c" x="490" y="37" text-anchor="middle">ffmpeg取得</text>
+  <rect class="btn-ghost" x="540" y="22" width="80" height="22"/>
+  <text class="l-c" x="580" y="37" text-anchor="middle">Colab前処理</text>
+  <rect class="btn-ghost" x="630" y="22" width="80" height="22"/>
+  <text class="l-c" x="670" y="37" text-anchor="middle">結果SRT読込</text>
+
+  <!-- file list -->
+  <rect class="panel" x="20" y="60" width="720" height="180"/>
+  <text class="head" x="30" y="80">入力ファイル (ドラッグ&amp;ドロップ可)</text>
+  <rect class="row" x="30" y="90" width="700" height="22"/>
+  <text class="l-m" x="40" y="106">ファイル名</text>
+  <text class="l-m" x="250" y="106">長さ</text>
+  <text class="l-m" x="320" y="106">形式</text>
+  <text class="l-m" x="500" y="106">状態</text>
+  <rect class="row" x="30" y="113" width="700" height="20" fill="#fff"/>
+  <text class="l" x="40" y="127">part_01.wav</text>
+  <text class="l" x="250" y="127">00:30:00</text>
+  <text class="l" x="320" y="127">pcm_f32le / 48000Hz / 2ch</text>
+  <text class="l" x="500" y="127">32bit float 検出</text>
+  <rect class="row" x="30" y="133" width="700" height="20"/>
+  <text class="l" x="40" y="147">part_02.wav</text>
+  <text class="l" x="250" y="147">00:30:00</text>
+  <text class="l" x="320" y="147">pcm_f32le / 48000Hz / 2ch</text>
+  <text class="l" x="500" y="147">32bit float 検出</text>
+  <rect class="row" x="30" y="153" width="700" height="20" fill="#fff"/>
+  <text class="l" x="40" y="167">part_03.wav</text>
+  <text class="l" x="250" y="167">00:25:12</text>
+  <text class="l" x="320" y="167">pcm_f32le / 48000Hz / 2ch</text>
+  <text class="l" x="500" y="167">32bit float 検出</text>
+
+  <rect class="btn-ghost" x="30" y="210" width="60" height="22"/>
+  <text class="l-c" x="60" y="225" text-anchor="middle">追加</text>
+  <rect class="btn-ghost" x="95" y="210" width="90" height="22"/>
+  <text class="l-c" x="140" y="225" text-anchor="middle">フォルダ追加</text>
+  <rect class="btn-ghost" x="190" y="210" width="50" height="22"/>
+  <text class="l-c" x="215" y="225" text-anchor="middle">上へ</text>
+  <rect class="btn-ghost" x="245" y="210" width="50" height="22"/>
+  <text class="l-c" x="270" y="225" text-anchor="middle">下へ</text>
+  <rect class="btn-ghost" x="300" y="210" width="50" height="22"/>
+  <text class="l-c" x="325" y="225" text-anchor="middle">削除</text>
+
+  <!-- settings -->
+  <rect class="panel" x="20" y="250" width="720" height="120"/>
+  <text class="head" x="30" y="270">設定</text>
+  <text class="l-m" x="30" y="290">モデル</text>
+  <rect class="row" x="80" y="278" width="150" height="20" fill="#fff" stroke="#d2d2d7"/>
+  <text class="l" x="90" y="292">large-v3-turbo ▼</text>
+  <text class="l-m" x="240" y="290">言語</text>
+  <rect class="row" x="280" y="278" width="100" height="20" fill="#fff" stroke="#d2d2d7"/>
+  <text class="l" x="290" y="292">日本語 (ja) ▼</text>
+  <text class="l-m" x="390" y="290">出力</text>
+  <rect class="row" x="430" y="278" width="300" height="20" fill="#fff" stroke="#d2d2d7"/>
+  <text class="l" x="440" y="292">C:\Users\...\Documents\WhisperTranscribe</text>
+
+  <text class="l" x="30" y="318">☑ ラウドネス正規化  ☐ 高品質モード(beam=10)</text>
+  <text class="l" x="30" y="338">出力形式: ☑ .txt  ☑ .srt  ☐ .vtt</text>
+  <text class="l" x="30" y="358">初期プロンプト: [模範的な書き起こし例を入力 ...]</text>
+
+  <!-- progress + buttons -->
+  <rect class="row" x="20" y="385" width="560" height="20" fill="#fff"/>
+  <rect class="btn" x="20" y="385" width="200" height="20" rx="3"/>
+  <text class="l-m" x="300" y="399" text-anchor="middle">進捗 35%</text>
+  <rect class="btn" x="590" y="380" width="100" height="28"/>
+  <text class="l-w" x="640" y="398" text-anchor="middle">文字起こし開始</text>
+  <rect class="btn-ghost" x="700" y="380" width="40" height="28"/>
+  <text class="l-c" x="720" y="398" text-anchor="middle">中止</text>
+
+  <!-- log -->
+  <rect class="panel" x="20" y="418" width="720" height="22"/>
+  <text class="l-m" x="30" y="433">[12:34:56] 連結 + ラウドネス正規化中... [12:35:08] 文字起こし開始 (beam=5, threads=7)</text>
+</svg>
+<div class="caption">▲ GUI レイアウト（ボタン構成・データグリッド・設定パネル）</div>
+</div>
+
+<h3>5-2. 文字起こしの流れ</h3>
+<table>
+  <tr><th class="center">手順</th><th>操作</th></tr>
+  <tr><td class="center">①</td><td>音声/動画ファイルをウィンドウ中央の一覧に<strong>ドラッグ&ドロップ</strong>（または「追加...」/「フォルダ追加...」）</td></tr>
+  <tr><td class="center">②</td><td>一覧の順序が連結順。必要なら <strong>「上へ」「下へ」</strong> で並び替え</td></tr>
+  <tr><td class="center">③</td><td>設定パネルで <strong>モデル・言語・出力フォルダ・出力形式</strong> を指定</td></tr>
+  <tr><td class="center">④</td><td>必要なら <strong>初期プロンプト</strong> に例文を入力（精度向上に有効・<a href="#prompt">§8</a>）</td></tr>
+  <tr><td class="center">⑤</td><td><strong>「文字起こし開始」</strong> を押す</td></tr>
+  <tr><td class="center">⑥</td><td>進捗バーとログを見ながら待機。完了後、出力フォルダに <code>.txt</code> / <code>.srt</code> / <code>.vtt</code> が生成される</td></tr>
+</table>
+
+<h2 id="cli">6. CLI版（wtcli）の使い方</h2>
+
+<p>バッチ処理・スクリプトからの呼び出し用にコマンドラインインターフェースも用意しています。</p>
+
+<h3>基本</h3>
+<pre><code>wtcli &lt;input&gt; [--model NAME] [--lang LANG] [--prompt TEXT] [--hq] [--no-norm] [--out DIR]</code></pre>
+
+<h3>例</h3>
+<pre><code># 1ファイルを日本語・smallモデルで文字起こし
+wtcli "C:\rec\meeting.m4a" --model small --lang ja
+
+# 複数ファイルを連結して文字起こし
+wtcli "C:\rec\part1.wav" "C:\rec\part2.wav" "C:\rec\part3.wav" --model large-v3-turbo
+
+# 高品質モード + 初期プロンプト
+wtcli "C:\rec\interview.mp3" --model large-v3 --hq `
+      --prompt "本日のインタビューでは、新製品の開発経緯についてお話を伺います。山田取締役、田中エンジニアにご登壇いただいています。"</code></pre>
+
+<h3>オプション一覧</h3>
+<table>
+  <tr><th>オプション</th><th>説明</th><th>デフォルト</th></tr>
+  <tr><td><code>--model NAME</code></td><td>モデル名 (tiny / base / small / medium / large-v3 / large-v3-turbo)</td><td><code>small</code></td></tr>
+  <tr><td><code>--lang LANG</code></td><td>言語コード (<code>ja</code> / <code>en</code> / <code>auto</code> 等)</td><td><code>ja</code></td></tr>
+  <tr><td><code>--prompt TEXT</code></td><td>initial_prompt（例文を渡す）</td><td>なし</td></tr>
+  <tr><td><code>--hq</code></td><td>高品質モード (beam_size=10)</td><td>OFF</td></tr>
+  <tr><td><code>--no-norm</code></td><td>ラウドネス正規化を無効化</td><td>正規化ON</td></tr>
+  <tr><td><code>--out DIR</code></td><td>出力フォルダ</td><td>入力と同じ場所</td></tr>
+</table>
+
+<h3>環境変数</h3>
+<table>
+  <tr><th>変数</th><th>意味</th><th>例</th></tr>
+  <tr><td><code>WHISPER_RUNTIME</code></td><td>ランタイム優先順（カンマ区切り）</td><td><code>Cuda,Cpu</code> / <code>Cpu</code> / <code>CpuNoAvx</code></td></tr>
+</table>
+
+<h2 id="models">7. モデルの選び方</h2>
+
+<div class="diagram">
+<svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .axis { stroke: #6e6e73; stroke-width: 1; }
+    .grid { stroke: #e5e5e7; stroke-width: 0.5; }
+    .lab { font: 11px sans-serif; fill: #6e6e73; }
+    .lab2 { font: 12px sans-serif; fill: #1d1d1f; }
+    .dot { stroke-width: 0; }
+    .lab-m { font: bold 11px sans-serif; fill: #1d1d1f; }
+  </style>
+  <!-- axes -->
+  <line class="axis" x1="80" y1="40" x2="80" y2="220"/>
+  <line class="axis" x1="80" y1="220" x2="700" y2="220"/>
+  <!-- grid -->
+  <line class="grid" x1="80" y1="60" x2="700" y2="60"/>
+  <line class="grid" x1="80" y1="100" x2="700" y2="100"/>
+  <line class="grid" x1="80" y1="140" x2="700" y2="140"/>
+  <line class="grid" x1="80" y1="180" x2="700" y2="180"/>
+  <!-- labels -->
+  <text class="lab" x="40" y="64">高</text>
+  <text class="lab" x="40" y="224">低</text>
+  <text class="lab" x="40" y="140" transform="rotate(-90 40 140)">精度</text>
+  <text class="lab" x="80" y="248">速</text>
+  <text class="lab" x="690" y="248">遅</text>
+  <text class="lab2" x="390" y="270" text-anchor="middle">推論時間 (CPU)</text>
+
+  <!-- points: tiny base small medium large-v3 turbo -->
+  <circle class="dot" cx="120" cy="200" r="14" fill="#ff3b30" opacity="0.7"/>
+  <text class="lab-m" x="120" y="232" text-anchor="middle">tiny</text>
+  <text class="lab" x="120" y="194" text-anchor="middle">77MB</text>
+
+  <circle class="dot" cx="180" cy="190" r="14" fill="#ff9500" opacity="0.7"/>
+  <text class="lab-m" x="180" y="232" text-anchor="middle">base</text>
+  <text class="lab" x="180" y="184" text-anchor="middle">148MB</text>
+
+  <circle class="dot" cx="270" cy="150" r="20" fill="#ffcc00" opacity="0.8"/>
+  <text class="lab-m" x="270" y="240" text-anchor="middle">small</text>
+  <text class="lab" x="270" y="120" text-anchor="middle">488MB</text>
+
+  <circle class="dot" cx="420" cy="100" r="26" fill="#34c759" opacity="0.7"/>
+  <text class="lab-m" x="420" y="240" text-anchor="middle">medium</text>
+  <text class="lab" x="420" y="62" text-anchor="middle">1.5GB</text>
+
+  <circle class="dot" cx="640" cy="60" r="34" fill="#0066cc" opacity="0.7"/>
+  <text class="lab-m" x="640" y="240" text-anchor="middle">large-v3</text>
+  <text class="lab" x="640" y="14" text-anchor="middle">3.0GB</text>
+
+  <circle class="dot" cx="500" cy="70" r="28" fill="#5856d6" opacity="0.85"/>
+  <text class="lab-m" x="500" y="240" text-anchor="middle">large-v3-turbo</text>
+  <text class="lab" x="500" y="32" text-anchor="middle">1.6GB ★おすすめ</text>
+</svg>
+<div class="caption">▲ サイズと色は ★円のサイズ＝モデルサイズ。色＝相対的な精度</div>
+</div>
+
+<table>
+  <tr><th>モデル</th><th>サイズ</th><th>速度</th><th>日本語精度</th><th>用途</th></tr>
+  <tr><td><strong>tiny</strong></td><td>77 MB</td><td>最速</td><td>△</td><td>試運転・速報</td></tr>
+  <tr><td><strong>base</strong></td><td>148 MB</td><td>速い</td><td>△</td><td>内容把握</td></tr>
+  <tr><td><strong>small</strong></td><td>488 MB</td><td>中</td><td>○</td><td>デイリー用途のバランス型（おすすめ）</td></tr>
+  <tr><td><strong>medium</strong></td><td>1.5 GB</td><td>遅い</td><td>◎</td><td>議事録など</td></tr>
+  <tr><td><strong>large-v3</strong></td><td>3.0 GB</td><td>最遅</td><td>◎◎</td><td>最高精度</td></tr>
+  <tr><td><strong>large-v3-turbo</strong></td><td>1.6 GB</td><td>中〜速い</td><td>◎</td><td>高精度かつ高速（一押し）</td></tr>
+</table>
+
+<div class="callout tip"><strong>🎯 迷ったら large-v3-turbo</strong>日本語精度はほぼ large-v3 と同等で、速度は small と medium の中間。</div>
+
+<h2 id="prompt">8. 初期プロンプトの書き方</h2>
+
+<p>Whisper の <code>initial_prompt</code> は<strong>「指示文」ではなく「模範的な書き起こし例」</strong>として書きます。最大 224 トークン（日本語で約 150〜180 文字）。</p>
+
+<h3>守るべき3つの原則</h3>
+<table>
+  <tr><th class="center">原則</th><th>内容</th></tr>
+  <tr><td class="center">①</td><td><strong>「指示」を書かない</strong>。「丁寧に書き起こしてください」のようなお願いは無意味（GPTのプロンプトとは別物）</td></tr>
+  <tr><td class="center">②</td><td><strong>句読点付きの完成文を 2〜3 文含める</strong>。これにより出力にも句読点が付く</td></tr>
+  <tr><td class="center">③</td><td><strong>固有名詞・専門用語は 10〜15 語に絞る</strong>。多すぎるとハルシネーション（誤生成）の原因</td></tr>
+</table>
+
+<div class="do-dont">
+  <div class="col good">
+    <h4>✅ 良い例（会議録音）</h4>
+    <pre><code>本日の経営会議では、第3四半期の業績報告と新製品のリリーススケジュールについて議論しました。
+出席者は、山田CEO、佐藤CFO、田中マーケティング部長、開発チームの鈴木リーダーです。</code></pre>
+  </div>
+  <div class="col bad">
+    <h4>❌ 悪い例</h4>
+    <ul>
+      <li>「ですます調で書き起こしてください」<br>← 指示は効きません</li>
+      <li>固有名詞リスト 50 個<br>← 多すぎ、ハルシネーション誘発</li>
+      <li>200 文字超の長文<br>← トークン上限で切り捨て</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout warn"><strong>⚠️ 効果の検証はモデルにより異なる</strong>tiny/base では効果が薄く、small 以上で顕著に効きます。large-v3-turbo + 適切な initial_prompt が最強の組合せ。</div>
+
+<h2 id="inputs">9. 入力フォーマットについて</h2>
+
+<table>
+  <tr><th>種類</th><th>拡張子</th></tr>
+  <tr><td>音声（非圧縮）</td><td><code>.wav</code>（<strong>32bit float WAV にも対応</strong>）</td></tr>
+  <tr><td>音声（圧縮）</td><td><code>.mp3</code> <code>.m4a</code> <code>.aac</code> <code>.flac</code> <code>.ogg</code> <code>.opus</code> <code>.wma</code></td></tr>
+  <tr><td>動画</td><td><code>.mp4</code> <code>.mov</code> <code>.mkv</code> <code>.avi</code> <code>.webm</code> <code>.m4v</code> <code>.ts</code></td></tr>
+</table>
+
+<div class="callout ok"><strong>✓ 32bit float WAV の自動検出</strong>ffprobe で音声フォーマットを解析し、画面上に <code>32bit float 検出</code> と表示。ffmpeg が自動で 16bit PCM に変換するため、ユーザー側で何かする必要はありません。</div>
+
+<h3>録音機が 30 分ごとに分割するケース</h3>
+<p>ファイル名でソートして上から順に投入すれば自動で連結されます。並び順は GUI 上で「上へ／下へ」で調整可能。</p>
+
+<h2 id="outputs">10. 出力フォーマット</h2>
+
+<h3>.txt — プレーンテキスト</h3>
+<pre><code>むかしむかしあるところに
+おじいさんとおばあさんがおりました
+おじいさんは山へしばかりに</code></pre>
+
+<h3>.srt — 字幕（タイムスタンプ付き）</h3>
+<pre><code>1
+00:00:04,480 --&gt; 00:00:10,380
+むかしむかしあるところに、おじいさんとおばあさんがおりました。
+
+2
+00:00:10,880 --&gt; 00:00:14,480
+おじいさんは毎日、山へしばかりに</code></pre>
+
+<h3>.vtt — Web標準字幕</h3>
+<pre><code>WEBVTT
+
+00:00:04.480 --&gt; 00:00:10.380
+むかしむかしあるところに、おじいさんとおばあさんがおりました。</code></pre>
+
+<h2 id="paths">11. ファイル保管場所</h2>
+<table>
+  <tr><th>種別</th><th>パス</th></tr>
+  <tr><td>アプリ本体</td><td>（任意の展開先）</td></tr>
+  <tr><td>ffmpeg / ffprobe</td><td><code>%LOCALAPPDATA%\WhisperTranscribe\ffmpeg\</code></td></tr>
+  <tr><td>Whisper モデル</td><td><code>%LOCALAPPDATA%\WhisperTranscribe\models\</code></td></tr>
+  <tr><td>中間 WAV ファイル</td><td><code>%LOCALAPPDATA%\WhisperTranscribe\temp\job_&lt;日時&gt;\</code></td></tr>
+  <tr><td>出力（既定）</td><td><code>%USERPROFILE%\Documents\WhisperTranscribe\</code></td></tr>
+  <tr><td>Colab inbox 用</td><td><code>%USERPROFILE%\Documents\WhisperTranscribe_Colab_Inbox\</code></td></tr>
+</table>
+
+<h2 id="troubleshoot">12. トラブルシューティング</h2>
+
+<h3>Q. アプリ起動直後にネイティブクラッシュ（exit code <code>0xC0000409</code> など）</h3>
+<p>GPU ランタイム（Vulkan/CUDA）の自動選択に失敗している可能性があります。CLI 版を環境変数付きで起動してください。</p>
+<pre><code>$env:WHISPER_RUNTIME = "Cpu"
+wtcli input.wav --model small</code></pre>
+<p>または <code>CpuNoAvx</code>（古い CPU 向け）も試してください。GUI 版の場合、システム環境変数に <code>WHISPER_RUNTIME=Cpu</code> を設定してから再起動。</p>
+
+<h3>Q. 「ffmpeg.exe が見つかりません」</h3>
+<p>右上の「ffmpeg取得」ボタンを押す、または手動で <code>%LOCALAPPDATA%\WhisperTranscribe\ffmpeg\</code> に <code>ffmpeg.exe</code> / <code>ffprobe.exe</code> を配置します。</p>
+
+<h3>Q. モデルダウンロードが途中で止まる</h3>
+<p>ネットワーク不安定や HuggingFace 側のリトライ等が原因です。<code>%LOCALAPPDATA%\WhisperTranscribe\models\</code> に残った <code>.part</code> ファイルを削除して再実行してください。</p>
+
+<h3>Q. 文字起こしが極端に遅い</h3>
+<ul>
+  <li><strong>モデルが大きすぎる</strong>: <code>medium</code> / <code>large</code> 系は CPU だと数倍時間がかかります。<code>small</code> か <code>large-v3-turbo</code> に下げる</li>
+  <li><strong>高品質モードが ON</strong>: beam=10 は処理が約2倍重くなります</li>
+  <li><strong>CPU が古い</strong>: 第4世代 Core より前は AVX2 が無く、<code>CpuNoAvx</code> ランタイム経由で動作するため遅い場合があります</li>
+</ul>
+
+<h3>Q. 出力テキストに句読点がない／変な単語が混ざる</h3>
+<p>初期プロンプトを活用してください（<a href="#prompt">§8</a>）。特に句読点については、句点を含む完成文を 2〜3 文プロンプトに入れることで改善されます。</p>
+
+<h3>Q. 大量ファイルを連結すると時間がかかる</h3>
+<p>デコード + concat + loudnorm の前処理はファイル数と総時間に比例します。ラウドネス正規化が不要な場合は OFF にすると倍速程度になります（CLI なら <code>--no-norm</code>）。</p>
+
+<h2 id="colab">13. Colab 半手動連携（無料 GPU 利用）</h2>
+
+<p>NVIDIA GPU を持たない PC でも、Google Colab の無料 T4 GPU を使って高速に文字起こしできます。<strong>CPU 比 5〜15 倍速</strong>。</p>
+
+<a href="https://colab.research.google.com/github/NamakeroBK/WhisperTranscribe/blob/main/colab/whisper_transcribe.ipynb" target="_blank">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab">
+</a>
+
+<h3>準備（初回のみ）</h3>
+<p>Google Drive のマイドライブ直下に次のフォルダを作ります（中身は空でOK）:</p>
+<pre><code>/MyDrive/WhisperTranscribe/inbox/    ← WAV をアップロードする場所
+/MyDrive/WhisperTranscribe/outbox/   ← 結果が出力される場所</code></pre>
+
+<h3>ワークフロー全体図</h3>
+<div class="diagram">
+<svg viewBox="0 0 760 460" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .b { fill: #ffffff; stroke: #d2d2d7; stroke-width: 1.5; rx: 6; }
+    .b-app { fill: #e6f0fb; stroke: #0066cc; }
+    .b-user { fill: #fff4e0; stroke: #ff9500; }
+    .b-cloud { fill: #f5e7ff; stroke: #5856d6; }
+    .b-out { fill: #e6f8ec; stroke: #34c759; }
+    .lab { font: 13px sans-serif; fill: #1d1d1f; }
+    .lab-s { font: 11px sans-serif; fill: #6e6e73; }
+    .lab-b { font: bold 12px sans-serif; fill: #1d1d1f; }
+    .a { fill: none; stroke: #6e6e73; stroke-width: 1.5; marker-end: url(#a3); }
+  </style>
+  <defs><marker id="a3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#6e6e73"/></marker></defs>
+
+  <!-- Step 1: App preprocesses -->
+  <rect class="b b-app" x="20" y="20" width="200" height="70"/>
+  <text class="lab-b" x="120" y="42" text-anchor="middle">① アプリで前処理</text>
+  <text class="lab-s" x="120" y="60" text-anchor="middle">「Colab前処理」ボタン</text>
+  <text class="lab-s" x="120" y="74" text-anchor="middle">連結+正規化+16kHz WAV</text>
+
+  <!-- Step 2: Local folder -->
+  <rect class="b" x="280" y="20" width="200" height="70"/>
+  <text class="lab-b" x="380" y="42" text-anchor="middle">② ローカルに出力</text>
+  <text class="lab-s" x="380" y="60" text-anchor="middle">Documents\</text>
+  <text class="lab-s" x="380" y="74" text-anchor="middle">WhisperTranscribe_Colab_Inbox</text>
+
+  <!-- Step 3: User uploads -->
+  <rect class="b b-user" x="540" y="20" width="200" height="70"/>
+  <text class="lab-b" x="640" y="42" text-anchor="middle">③ ユーザが Drive へ</text>
+  <text class="lab-s" x="640" y="60" text-anchor="middle">ドラッグ&amp;ドロップで</text>
+  <text class="lab-s" x="640" y="74" text-anchor="middle">/MyDrive/.../inbox/ へ</text>
+
+  <!-- Step 4: Colab runs -->
+  <rect class="b b-cloud" x="540" y="160" width="200" height="90"/>
+  <text class="lab-b" x="640" y="184" text-anchor="middle">④ Colab で実行</text>
+  <text class="lab-s" x="640" y="202" text-anchor="middle">GPU (T4) 選択 →</text>
+  <text class="lab-s" x="640" y="218" text-anchor="middle">「すべてのセルを実行」</text>
+  <text class="lab-s" x="640" y="238" text-anchor="middle">faster-whisper</text>
+
+  <!-- Step 5: outbox -->
+  <rect class="b b-cloud" x="540" y="290" width="200" height="70"/>
+  <text class="lab-b" x="640" y="312" text-anchor="middle">⑤ outbox に生成</text>
+  <text class="lab-s" x="640" y="330" text-anchor="middle">/MyDrive/.../outbox/</text>
+  <text class="lab-s" x="640" y="346" text-anchor="middle">*.srt / *.txt / *.vtt</text>
+
+  <!-- Step 6: Download -->
+  <rect class="b b-user" x="280" y="290" width="200" height="70"/>
+  <text class="lab-b" x="380" y="312" text-anchor="middle">⑥ ダウンロード</text>
+  <text class="lab-s" x="380" y="330" text-anchor="middle">Drive から SRT を</text>
+  <text class="lab-s" x="380" y="346" text-anchor="middle">PC にダウンロード</text>
+
+  <!-- Step 7: import to app -->
+  <rect class="b b-out" x="20" y="290" width="200" height="70"/>
+  <text class="lab-b" x="120" y="312" text-anchor="middle">⑦ アプリに取り込み</text>
+  <text class="lab-s" x="120" y="330" text-anchor="middle">「結果SRT読込」ボタン</text>
+  <text class="lab-s" x="120" y="346" text-anchor="middle">出力フォルダへコピー</text>
+
+  <!-- Arrows -->
+  <path class="a" d="M 220 55 L 275 55"/>
+  <path class="a" d="M 480 55 L 535 55"/>
+  <path class="a" d="M 640 90 L 640 155"/>
+  <path class="a" d="M 640 250 L 640 285"/>
+  <path class="a" d="M 540 325 L 485 325"/>
+  <path class="a" d="M 280 325 L 225 325"/>
+
+  <!-- Labels -->
+  <text class="lab-s" x="120" y="115" text-anchor="middle" font-style="italic">アプリが自動でフォルダとブラウザ起動</text>
+  <text class="lab-s" x="640" y="278" text-anchor="middle" font-style="italic">通常 1〜3分</text>
+</svg>
+<div class="caption">▲ Colab 半手動連携の全工程</div>
+</div>
+
+<h3>使い方</h3>
+<ol>
+  <li>アプリにファイルを追加（通常通り）</li>
+  <li>右上の <strong>「Colab前処理」</strong> ボタンを押す
+    <ul>
+      <li>アプリが連結・正規化・16kHz変換を実行</li>
+      <li><code>%USERPROFILE%\Documents\WhisperTranscribe_Colab_Inbox\</code> に最終 WAV を出力</li>
+      <li>エクスプローラーがそのフォルダを表示し、ブラウザで Colab Notebook が開く</li>
+    </ul>
+  </li>
+  <li>エクスプローラーの WAV を <strong>Google Drive の <code>inbox/</code> にドラッグ&amp;ドロップ</strong></li>
+  <li>ブラウザの Colab Notebook で:
+    <ul>
+      <li>上部メニュー: ランタイム → ランタイムのタイプを変更 → <strong>GPU (T4)</strong> を選択</li>
+      <li>「4. 設定」セルを開き、必要なら <code>MODEL</code> <code>LANGUAGE</code> <code>INITIAL_PROMPT</code> を編集</li>
+      <li>メニュー: ランタイム → <strong>すべてのセルを実行</strong> (Ctrl+F9)</li>
+      <li>Drive のマウント承認ダイアログが出たら許可</li>
+    </ul>
+  </li>
+  <li>完了すると <code>outbox/</code> に <code>.txt</code> <code>.srt</code> <code>.vtt</code> が生成される（Notebook の最後のセルで PC へ直接ダウンロードも可）</li>
+  <li>アプリに戻り、右上の <strong>「結果SRT読込」</strong> ボタンから取得した SRT を選択</li>
+</ol>
+
+<h3>Notebook の特徴</h3>
+<ul>
+  <li><strong>モデル</strong>: 初期値 <code>large-v3-turbo</code>（GPU で1分音声 ≒ 6〜10秒）</li>
+  <li><strong>VAD フィルタ</strong>: 無音区間スキップで処理高速化</li>
+  <li><strong>推奨パラメータ適用</strong>: <code>temperature=0.0</code>, <code>condition_on_previous_text=False</code>（幻覚抑制）</li>
+  <li><strong>対応形式</strong>: WAV/MP3/M4A/FLAC（アプリが WAV を吐くので通常 WAV）</li>
+</ul>
+
+<h3>Colab 無料枠の制限</h3>
+<table>
+  <tr><th>項目</th><th>制限</th></tr>
+  <tr><td>連続セッション</td><td>最大 12 時間</td></tr>
+  <tr><td>アイドル切断</td><td>約 90 分操作なしで切断</td></tr>
+  <tr><td>GPU 種別</td><td>T4 が割当（混雑時は CPU のみになることも）</td></tr>
+  <tr><td>月間利用上限</td><td>厳格な数値非公開、ヘビーユーザーには制限</td></tr>
+</table>
+
+<div class="callout warn"><strong>⚠️ GPU 未割当の場合</strong>Notebook の最初のセル <code>!nvidia-smi</code> の出力で T4 が割り当てられたか確認できます。「No GPU found」の場合はランタイムタイプ変更で GPU を選択してください。</div>
+
+<h3>よくある質問</h3>
+
+<h4>Q. Drive にアップロードした WAV が Notebook から見えない</h4>
+<p>マイドライブの<strong>直下</strong>に <code>WhisperTranscribe</code> フォルダが必要です。<code>/MyDrive/Apps/...</code> などにあると Notebook の探索パスと合いません。</p>
+
+<h4>Q. 「No CUDA GPUs are available」エラー</h4>
+<p>ランタイム → ランタイムのタイプを変更 で GPU を選び、ランタイム → ランタイムを再起動して再実行。</p>
+
+<h4>Q. メモリ不足エラー（<code>large-v3</code> でクラッシュ）</h4>
+<p>設定セルで <code>COMPUTE_TYPE = 'int8_float16'</code> に変更すると VRAM 使用量が半減。または <code>MODEL = 'large-v3-turbo'</code>（既定）の方が軽量で実用的。</p>
+
+<hr style="margin: 60px 0; border: none; border-top: 1px solid var(--border);">
+
+<h2 style="border-top: none;">付録: ライセンス</h2>
+<ul>
+  <li>本アプリ: MIT</li>
+  <li>whisper.cpp / Whisper.net: MIT</li>
+  <li>ffmpeg: LGPL/GPL（バイナリ同梱せず、初回起動時に gyan.dev から自動取得）</li>
+  <li>faster-whisper: MIT（Colab Notebook 内で使用）</li>
+</ul>
+
+<p style="color: var(--muted); font-size: 12px; margin-top: 40px;">
+リポジトリ: <a href="https://github.com/NamakeroBK/WhisperTranscribe">https://github.com/NamakeroBK/WhisperTranscribe</a><br>
+最終更新: 2026-05-17
+</p>
+
+</main>
+</div>
+</body>
+</html>
