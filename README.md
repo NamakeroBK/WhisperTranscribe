@@ -63,6 +63,21 @@ dotnet build -c Release
 - モデル: `%LOCALAPPDATA%\WhisperTranscribe\models\`
 - 中間ファイル: `%LOCALAPPDATA%\WhisperTranscribe\temp\`
 
+## Colab 半手動連携（無料 GPU 利用）
+
+NVIDIA GPU 不要で T4 GPU を使った高速文字起こしが可能です。
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NamakeroBK/WhisperTranscribe/blob/main/colab/whisper_transcribe.ipynb)
+
+簡易フロー:
+1. アプリの「Colab前処理」ボタン → 連結+正規化済み WAV 出力 + Colab Notebook をブラウザ起動
+2. Google Drive `/MyDrive/WhisperTranscribe/inbox/` に WAV をドラッグ&ドロップ
+3. Colab で「すべてのセルを実行」
+4. `outbox/` に出る `.srt` をダウンロード
+5. アプリの「結果SRT読込」で取り込み
+
+詳細は [MANUAL.md の 13章](MANUAL.md#13-colab-半手動連携無料-gpu-利用) を参照。
+
 ## ライセンス
 
 - 本アプリ: MIT

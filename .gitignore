@@ -32,3 +32,6 @@ test_data/*.wav
 test_data/*.mp3
 test_data/*_whisper.*
 test_data/run.log
+test_data/turbo/
+test_data/stdout*.log
+test_data/stderr*.log

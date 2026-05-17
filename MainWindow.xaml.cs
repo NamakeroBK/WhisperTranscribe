@@ -340,4 +340,103 @@ public partial class MainWindow : Window
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => _cts?.Cancel();
+
+    // ----- Colab 半手動連携 -----
+    private async void ColabPrepare_Click(object sender, RoutedEventArgs e)
+    {
+        if (_files.Count == 0)
+        {
+            MessageBox.Show(this, "入力ファイルを追加してください。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        if (!_ffmpeg.IsInstalled)
+        {
+            MessageBox.Show(this, "先に ffmpeg を取得してください。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        StartButton.IsEnabled = false;
+        CancelButton.IsEnabled = true;
+        MainProgress.Value = 0;
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            var colab = new ColabHelper();
+            colab.Log += Log;
+            var outName = string.IsNullOrWhiteSpace(OutNameBox.Text) ? "audio" : OutNameBox.Text.Trim();
+            var wav = await colab.PrepareForColabAsync(
+                _files.Select(f => f.FullPath).ToList(),
+                NormalizeCheck.IsChecked == true,
+                outName,
+                _cts.Token);
+
+            colab.OpenInbox();
+            colab.OpenNotebook();
+
+            var prompt = string.IsNullOrWhiteSpace(InitialPromptBox.Text) ? "(なし)" : InitialPromptBox.Text.Trim();
+            MessageBox.Show(this,
+                "WAV を Colab inbox フォルダに出力し、Notebook をブラウザで開きました。\n\n" +
+                "【次の手順】\n" +
+                $"1. 開いたエクスプローラーの WAV ({Path.GetFileName(wav)}) を\n" +
+                "   Google Drive の /MyDrive/WhisperTranscribe/inbox/ にアップロード\n" +
+                "2. ブラウザの Colab Notebook で:\n" +
+                "   - ランタイム → ランタイムのタイプを変更 → GPU (T4)\n" +
+                "   - 設定セルでモデルや言語を確認・編集 (initial_prompt も)\n" +
+                "   - メニュー → ランタイム → すべてのセルを実行\n" +
+                "3. 完了したら /MyDrive/WhisperTranscribe/outbox/ の .srt をダウンロード\n" +
+                "4. このアプリの「結果SRT読込」で取り込み\n\n" +
+                $"初期プロンプト (Notebook 設定セルにコピペ用):\n{prompt}",
+                "Colab 半手動連携",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (OperationCanceledException)
+        {
+            Log("中止されました。");
+        }
+        catch (Exception ex)
+        {
+            Log("Colab 準備失敗: " + ex.Message);
+            MessageBox.Show(this, ex.Message, "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            StartButton.IsEnabled = true;
+            CancelButton.IsEnabled = false;
+            _cts?.Dispose();
+            _cts = null;
+        }
+    }
+
+    private void ImportResult_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new OpenFileDialog
+        {
+            Title = "Colab から取得した結果ファイルを選択",
+            Filter = "字幕/テキスト|*.srt;*.vtt;*.txt|すべて|*.*",
+            Multiselect = true,
+        };
+        if (dlg.ShowDialog(this) != true) return;
+
+        var outDir = string.IsNullOrWhiteSpace(OutDirBox.Text)
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WhisperTranscribe")
+            : OutDirBox.Text;
+        Directory.CreateDirectory(outDir);
+
+        foreach (var src in dlg.FileNames)
+        {
+            try
+            {
+                var dst = Path.Combine(outDir, Path.GetFileName(src));
+                File.Copy(src, dst, overwrite: true);
+                Log($"取り込み: {dst}");
+            }
+            catch (Exception ex)
+            {
+                Log("取り込み失敗: " + src + " — " + ex.Message);
+            }
+        }
+        MessageBox.Show(this, $"{dlg.FileNames.Length} 件を出力フォルダに保存しました:\n{outDir}",
+            "取り込み完了", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
 }

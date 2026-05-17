@@ -16,4 +16,15 @@
     <PackageReference Include="xFFmpeg.NET" Version="7.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- ネストプロジェクト(TestRunner)を自身のビルドに巻き込まない -->
+    <Compile Remove="TestRunner\**"/>
+    <Content Remove="TestRunner\**"/>
+    <EmbeddedResource Remove="TestRunner\**"/>
+    <None Remove="TestRunner\**"/>
+    <Page Remove="TestRunner\**"/>
+    <Resource Remove="TestRunner\**"/>
+    <ApplicationDefinition Remove="TestRunner\**"/>
+  </ItemGroup>
+
 </Project>

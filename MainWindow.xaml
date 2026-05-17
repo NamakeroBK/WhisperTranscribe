@@ -18,6 +18,8 @@
                 Whisper Transcribe
             </TextBlock>
             <Button DockPanel.Dock="Right" Content="モデル管理..." Width="120" Click="ManageModels_Click"/>
+            <Button DockPanel.Dock="Right" Content="結果SRT読込" Width="110" Margin="0,0,8,0" Click="ImportResult_Click" ToolTip="Colab から取得した SRT/TXT/VTT を取り込む"/>
+            <Button DockPanel.Dock="Right" Content="Colab前処理" Width="100" Margin="0,0,8,0" Click="ColabPrepare_Click" ToolTip="連結+正規化した WAV を出力し、Colab Notebook をブラウザで開く"/>
             <Button DockPanel.Dock="Right" Content="ffmpeg取得" Width="100" Margin="0,0,8,0" Click="InstallFfmpeg_Click"/>
         </DockPanel>
 

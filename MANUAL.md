@@ -18,6 +18,7 @@
 10. [出力フォーマット](#10-出力フォーマット)
 11. [ファイル保管場所](#11-ファイル保管場所)
 12. [トラブルシューティング](#12-トラブルシューティング)
+13. [Colab 半手動連携（無料 GPU 利用）](#13-colab-半手動連携無料-gpu-利用)
 
 ---
 
@@ -350,6 +351,96 @@ A. デコード + concat + loudnorm の前処理はファイル数と総時間�
 ### Q. 進捗バーが動かない区間がある
 
 A. Whisper 内部処理（モデル初期化やセグメント解析の前半）は進捗を返さない区間があります。ログに「文字起こし開始」のメッセージが出ていれば正常に動いています。
+
+---
+
+## 13. Colab 半手動連携（無料 GPU 利用）
+
+NVIDIA GPU を持たない PC でも、Google Colab の無料 T4 GPU を使って高速に文字起こしできます。**CPU 比 5〜15 倍速**。
+
+### 準備（初回のみ）
+
+Google Drive のマイドライブ直下に次のフォルダを作ります（中身は空でOK）:
+
+```
+/MyDrive/WhisperTranscribe/inbox/    ← WAV をアップロードする場所
+/MyDrive/WhisperTranscribe/outbox/   ← 結果が出力される場所
+```
+
+### 使い方
+
+1. **アプリにファイルを追加**（通常通り）
+2. 設定パネルで **モデル不要**（Colab 側で選ぶ）、**言語・初期プロンプト**は確認
+3. 右上の **「Colab前処理」** ボタンを押す
+   - アプリが連結・正規化・16kHz変換を行い、`%USERPROFILE%\Documents\WhisperTranscribe_Colab_Inbox\` に最終 WAV を出力
+   - エクスプローラーがそのフォルダを表示し、ブラウザで Colab Notebook が開く
+4. **エクスプローラーの WAV を Google Drive の `inbox/` にドラッグ&ドロップ**
+5. ブラウザの Colab Notebook で:
+   - 上部メニュー: ランタイム → ランタイムのタイプを変更 → **GPU (T4)** を選択
+   - 「**4. 設定**」セルを開き、必要なら `MODEL` `LANGUAGE` `INITIAL_PROMPT` を編集
+     - アプリの初期プロンプト欄に書いたテキストは、アプリ実行時のダイアログにコピペ可能な形で表示されます
+   - メニュー: ランタイム → **すべてのセルを実行** (Ctrl+F9)
+   - Drive のマウント承認ダイアログが出たら許可
+6. 完了すると `outbox/` に `.txt` `.srt` `.vtt` が生成される（Notebook の最後のセルで PC へ直接ダウンロードもできる）
+7. アプリに戻り、右上の **「結果SRT読込」** ボタンから取得した SRT を選択
+   - 出力フォルダにコピーされ、文字起こし結果として保存される
+
+### 内部処理フロー
+
+```
+[このアプリ] 連結+正規化+16kHz変換
+    │
+    ▼
+[Documents\WhisperTranscribe_Colab_Inbox\*.wav]
+    │   (ユーザがドラッグ&ドロップ)
+    ▼
+[Google Drive /MyDrive/WhisperTranscribe/inbox/]
+    │
+    ▼
+[Colab Notebook on GPU] ─ faster-whisper で文字起こし
+    │
+    ▼
+[Google Drive /MyDrive/WhisperTranscribe/outbox/*.srt]
+    │   (ユーザがダウンロード)
+    ▼
+[このアプリ「結果SRT読込」で出力フォルダへ取り込み]
+```
+
+### Notebook の特徴
+
+- **モデル**: 初期値 `large-v3-turbo`（GPU で1分音声 ≒ 6〜10秒）
+- **VAD フィルタ**: 無音区間スキップで処理高速化
+- **推奨パラメータ適用**: `temperature=0.0`, `condition_on_previous_text=False`（幻覚抑制）
+- **対応形式**: WAV/MP3/M4A/FLAC（アプリが WAV を吐くので通常 WAV）
+
+### Colab 無料枠の制限
+
+| 項目 | 制限 |
+|---|---|
+| 連続セッション | 最大 12 時間 |
+| アイドル切断 | 約 90 分操作なしで切断 |
+| GPU 種別 | T4 が割当（混雑時は CPU のみになることも） |
+| 月間利用上限 | 厳格な数値非公開、ヘビーユーザーには制限 |
+
+> Notebook の最初のセル `!nvidia-smi` の出力で T4 が割り当てられたか確認できます。「No GPU found」の場合はランタイムタイプ変更からGPU選択してください。
+
+### よくある質問
+
+**Q. Drive にアップロードした WAV が Notebook から見えない**
+
+A. マイドライブの **直下** に `WhisperTranscribe` フォルダが必要です。`/MyDrive/Apps/...` などにあると Notebook の探索パスと合いません。
+
+**Q. 「No CUDA GPUs are available」エラー**
+
+A. ランタイム → ランタイムのタイプを変更 で GPU を選び、ランタイム → ランタイムを再起動して再実行。
+
+**Q. メモリ不足エラー (`large-v3` でクラッシュ)**
+
+A. 設定セルで `COMPUTE_TYPE = 'int8_float16'` に変更すると VRAM 使用量が半減。または `MODEL = 'large-v3-turbo'`（既定）の方が軽量で実用的。
+
+**Q. ファイルが大きすぎてアップロードが遅い**
+
+A. ラウドネス正規化済み 16kHz mono WAV は 1 時間で約 110 MB。長尺ならアプリ側で分割してから upload するのも有効。
 
 ---
 
