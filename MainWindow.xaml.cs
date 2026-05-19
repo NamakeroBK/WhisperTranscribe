@@ -49,9 +49,7 @@ public partial class MainWindow : Window
         _ffmpeg.Log += Log;
         _modelMgr.Log += Log;
 
-        OutDirBox.Text = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            "WhisperTranscribe");
+        OutDirBox.Text = AppPaths.DefaultOutputDir;
         OutNameBox.Text = "transcript";
 
         LanguageCombo.ItemsSource = Languages.Select(l => $"{l.Label} ({l.Code})").ToArray();
@@ -266,8 +264,7 @@ public partial class MainWindow : Window
             MessageBox.Show(this, "出力形式を1つ以上選択してください。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
-        if (string.IsNullOrWhiteSpace(OutDirBox.Text)) OutDirBox.Text = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WhisperTranscribe");
+        if (string.IsNullOrWhiteSpace(OutDirBox.Text)) OutDirBox.Text = AppPaths.DefaultOutputDir;
         Directory.CreateDirectory(OutDirBox.Text);
 
         var lang = Languages[Math.Max(0, LanguageCombo.SelectedIndex)].Code;
@@ -419,7 +416,7 @@ public partial class MainWindow : Window
         if (dlg.ShowDialog(this) != true) return;
 
         var outDir = string.IsNullOrWhiteSpace(OutDirBox.Text)
-            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WhisperTranscribe")
+            ? AppPaths.DefaultOutputDir
             : OutDirBox.Text;
         Directory.CreateDirectory(outDir);
 

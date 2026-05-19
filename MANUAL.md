@@ -298,7 +298,7 @@ Whisper の `initial_prompt` は**指示文ではなく「模範的な書き起�
 | ffmpeg / ffprobe | `%LOCALAPPDATA%\WhisperTranscribe\ffmpeg\` |
 | Whisper モデル | `%LOCALAPPDATA%\WhisperTranscribe\models\` |
 | 中間 WAV ファイル | `%LOCALAPPDATA%\WhisperTranscribe\temp\job_<日時>\` |
-| 出力（既定） | `%USERPROFILE%\Documents\WhisperTranscribe\` |
+| 出力（既定） | `%USERPROFILE%\Desktop\Claude\WhisperTranscribe\` |
 
 > **温存ファイルの掃除**: `temp\` フォルダは結合済み最終 WAV を残します。ディスク容量が気になる場合は手動で削除して問題ありません。
 
@@ -372,7 +372,7 @@ Google Drive のマイドライブ直下に次のフォルダを作ります（�
 1. **アプリにファイルを追加**（通常通り）
 2. 設定パネルで **モデル不要**（Colab 側で選ぶ）、**言語・初期プロンプト**は確認
 3. 右上の **「Colab前処理」** ボタンを押す
-   - アプリが連結・正規化・16kHz変換を行い、`%USERPROFILE%\Documents\WhisperTranscribe_Colab_Inbox\` に最終 WAV を出力
+   - アプリが連結・正規化・16kHz変換を行い、`%USERPROFILE%\Desktop\Claude\WhisperTranscribe_Colab_Inbox\` に最終 WAV を出力
    - エクスプローラーがそのフォルダを表示し、ブラウザで Colab Notebook が開く
 4. **エクスプローラーの WAV を Google Drive の `inbox/` にドラッグ&ドロップ**
 5. ブラウザの Colab Notebook で:
@@ -391,7 +391,7 @@ Google Drive のマイドライブ直下に次のフォルダを作ります（�
 [このアプリ] 連結+正規化+16kHz変換
     │
     ▼
-[Documents\WhisperTranscribe_Colab_Inbox\*.wav]
+[Desktop\Claude\WhisperTranscribe_Colab_Inbox\*.wav]
     │   (ユーザがドラッグ&ドロップ)
     ▼
 [Google Drive /MyDrive/WhisperTranscribe/inbox/]

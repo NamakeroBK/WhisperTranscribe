@@ -18,9 +18,7 @@ public class ColabHelper
     public const string NotebookUrl =
         "https://colab.research.google.com/github/NamakeroBK/WhisperTranscribe/blob/main/colab/whisper_transcribe.ipynb";
 
-    public static string InboxDir { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-        "WhisperTranscribe_Colab_Inbox");
+    public static string InboxDir => AppPaths.ColabInboxDir;
 
     public event Action<string>? Log;
 

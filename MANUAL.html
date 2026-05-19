@@ -369,7 +369,7 @@ dotnet build -c Release</code></pre>
   <text class="l" x="290" y="292">日本語 (ja) ▼</text>
   <text class="l-m" x="390" y="290">出力</text>
   <rect class="row" x="430" y="278" width="300" height="20" fill="#fff" stroke="#d2d2d7"/>
-  <text class="l" x="440" y="292">C:\Users\...\Documents\WhisperTranscribe</text>
+  <text class="l" x="440" y="292">C:\Users\...\Desktop\Claude\WhisperTranscribe</text>
 
   <text class="l" x="30" y="318">☑ ラウドネス正規化  ☐ 高品質モード(beam=10)</text>
   <text class="l" x="30" y="338">出力形式: ☑ .txt  ☑ .srt  ☐ .vtt</text>
@@ -578,8 +578,8 @@ wtcli "C:\rec\interview.mp3" --model large-v3 --hq `
   <tr><td>ffmpeg / ffprobe</td><td><code>%LOCALAPPDATA%\WhisperTranscribe\ffmpeg\</code></td></tr>
   <tr><td>Whisper モデル</td><td><code>%LOCALAPPDATA%\WhisperTranscribe\models\</code></td></tr>
   <tr><td>中間 WAV ファイル</td><td><code>%LOCALAPPDATA%\WhisperTranscribe\temp\job_&lt;日時&gt;\</code></td></tr>
-  <tr><td>出力（既定）</td><td><code>%USERPROFILE%\Documents\WhisperTranscribe\</code></td></tr>
-  <tr><td>Colab inbox 用</td><td><code>%USERPROFILE%\Documents\WhisperTranscribe_Colab_Inbox\</code></td></tr>
+  <tr><td>出力（既定）</td><td><code>%USERPROFILE%\Desktop\Claude\WhisperTranscribe\</code></td></tr>
+  <tr><td>Colab inbox 用</td><td><code>%USERPROFILE%\Desktop\Claude\WhisperTranscribe_Colab_Inbox\</code></td></tr>
 </table>
 
 <h2 id="troubleshoot">12. トラブルシューティング</h2>
@@ -702,7 +702,7 @@ wtcli input.wav --model small</code></pre>
   <li>右上の <strong>「Colab前処理」</strong> ボタンを押す
     <ul>
       <li>アプリが連結・正規化・16kHz変換を実行</li>
-      <li><code>%USERPROFILE%\Documents\WhisperTranscribe_Colab_Inbox\</code> に最終 WAV を出力</li>
+      <li><code>%USERPROFILE%\Desktop\Claude\WhisperTranscribe_Colab_Inbox\</code> に最終 WAV を出力</li>
       <li>エクスプローラーがそのフォルダを表示し、ブラウザで Colab Notebook が開く</li>
     </ul>
   </li>
