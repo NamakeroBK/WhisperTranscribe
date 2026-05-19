@@ -26,8 +26,11 @@ public static class AppPaths
             ? overrideRoot
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "Claude");
 
+    /// <summary>ユーザ向け成果物の親フォルダ (文字起こし結果 + Colab inbox)。</summary>
     public static string DefaultOutputDir { get; } = Path.Combine(UserRoot, "WhisperTranscribe");
-    public static string ColabInboxDir { get; } = Path.Combine(UserRoot, "WhisperTranscribe_Colab_Inbox");
+
+    /// <summary>Colab アップロード用 WAV の置き場 (出力フォルダ内のサブフォルダ)。</summary>
+    public static string ColabInboxDir { get; } = Path.Combine(DefaultOutputDir, "colab_inbox");
 
     public static void EnsureDirectories()
     {
